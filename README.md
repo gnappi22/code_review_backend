@@ -290,11 +290,14 @@ This project is created for the code review exercise and is not intended for pro
 
 TODO:
 
-1) make sure everything works
-2) review code to make sure I understand everything
+1) make sure everything works                           DONE
+2) review code to make sure I understand everything     
 3) Cosmetic and structural improvements
     - database structure
     - class + api structure
 4) refine llm side of things
 5) 
 
+All the things that I would do:
+
+1) 

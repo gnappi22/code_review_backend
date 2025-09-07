@@ -31,3 +31,4 @@ docker-compose up --build
 
 echo "🎉 Service started! Visit http://localhost:8000/docs for API documentation"
 
+
