@@ -7,7 +7,7 @@ import requests
 import json
 import time
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 def test_health_check():
     """Test the health check endpoint"""
@@ -23,8 +23,8 @@ def test_create_snippet():
     
     test_snippet = {
         "language": "python",
-        "code": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
-        "lines": "1-4"
+        "code": "print('Ciao, mondo!')\nfor i in range(5):\n    print(i)\n",
+        "lines": "1-2"
     }
     
     response = requests.post(
@@ -74,7 +74,9 @@ def test_list_snippets():
         data = response.json()
         print(f"Found {len(data)} snippets")
         for snippet in data:
-            print(f"  - ID {snippet['id']}: {snippet['language']} ({snippet['review']['rating']}/10)")
+            review = snippet.get('review', {})
+            rating = review.get('rating', 'N/A')
+            print(f"  - ID {snippet.get('id', 'N/A')}: {snippet.get('language', 'N/A')} ({rating}/10)")
     else:
         print(f"Error: {response.text}")
     print()
@@ -97,10 +99,11 @@ def main():
         print("All tests completed!")
         
     except requests.exceptions.ConnectionError:
-        print("Error: Could not connect to the API. Make sure the service is running on http://localhost:8000")
+        print("Error: Could not connect to the API. Make sure the service is running on http://localhost:8001")
     except Exception as e:
         print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
+
 

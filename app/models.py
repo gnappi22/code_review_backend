@@ -23,3 +23,4 @@ class CodeSnippetResponse(BaseModel):
     class Config:
         from_attributes = True
 
+

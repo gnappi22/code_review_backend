@@ -4,12 +4,13 @@ A FastAPI-based backend service that accepts code snippets and returns structure
 
 ## Features
 
-- **Code Snippet Submission**: Submit code snippets with language detection and line number information
-- **AI-Powered Reviews**: Generate comprehensive code reviews using OpenAI's GPT-3.5-turbo model
-- **Structured Responses**: Get reviews with summary, suggestions, and ratings
+- **Code Snippet Submission**: Submit code snippets with language and line number information
+- **AI-Powered Reviews**: Generate code reviews using OpenAI's GPT-3.5-turbo (configurable)
+- **Structured Responses**: Reviews include summary, suggestions (always a list), and rating
 - **Persistent Storage**: SQLite database for storing snippets and reviews
-- **RESTful API**: Clean, async-compatible endpoints
+- **RESTful API**: Async endpoints for code review and snippet management
 - **Docker Support**: Easy deployment with Docker and docker-compose
+- **Robust Error Handling**: Defensive parsing for review suggestions
 
 ## API Endpoints
 
@@ -44,6 +45,7 @@ Submit a code snippet for review.
   "created_at": "2024-01-15T10:30:00Z"
 }
 ```
+- Suggestions are always returned as a list, even if the LLM returns a string.
 
 ### GET /snippets/{id}
 Retrieve a specific snippet and its review by ID.
@@ -142,13 +144,15 @@ code_review_backend/
 │   ├── main.py              # FastAPI application and endpoints
 │   ├── models.py            # Pydantic models for request/response
 │   ├── database.py          # SQLAlchemy database configuration
-│   └── llm_service.py       # OpenAI integration service
+│   ├── llm_service.py       # OpenAI integration service
+│   ├── code_reviewer_service.py # Service for code review orchestration
+│   └── configs.py           # Configurations for prompts and schemas
 ├── data/                    # SQLite database storage (created at runtime)
 ├── requirements.txt         # Python dependencies
-├── Dockerfile              # Docker configuration
-├── docker-compose.yml      # Docker Compose configuration
-├── env.example             # Environment variables template
-└── README.md               # This file
+├── Dockerfile               # Docker configuration
+├── docker-compose.yml       # Docker Compose configuration
+├── env.example              # Environment variables template
+└── README.md                # This file
 ```
 
 ## Database Schema
@@ -162,7 +166,7 @@ The service uses SQLite with the following schema:
   - `lines`: Line number range (optional)
   - `created_at`: Timestamp
   - `review_summary`: AI-generated review summary
-  - `review_suggestions`: JSON array of suggestions
+  - `review_suggestions`: JSON array of suggestions (always a list, defensive parsing in API)
   - `review_rating`: Numerical rating (1-10)
 
 ## Configuration
@@ -177,78 +181,13 @@ The service uses SQLite with the following schema:
 The service uses GPT-3.5-turbo by default. You can modify the model in `app/llm_service.py`:
 
 ```python
-response = self.client.chat.completions.create(
-    model="gpt-3.5-turbo",  # Change this to gpt-4 or other models
-    # ... other parameters
-)
+self.model = "gpt-3.5-turbo"  # Change this to gpt-4 or other models
 ```
 
-## Future Enhancements
+### Prompt and Schema Configuration
 
-If I had a week to implement additional features, here are the improvements I would prioritize:
-
-### 1. Enhanced Review Quality (2-3 days)
-- **Multi-model support**: Integrate multiple LLM providers (Claude, Gemini) for comparison
-- **Context-aware reviews**: Include file context, imports, and related functions
-- **Custom review templates**: Allow users to specify review focus areas (security, performance, style)
-- **Review confidence scoring**: Add confidence metrics to AI suggestions
-
-### 2. Advanced Features (2-3 days)
-- **Batch processing**: Support multiple snippets in a single request
-- **Review history**: Track review iterations and improvements over time
-- **Custom rules engine**: Allow teams to define custom coding standards
-- **Integration webhooks**: Real-time notifications for completed reviews
-
-### 3. Performance & Scalability (1-2 days)
-- **Caching layer**: Redis for frequently accessed reviews
-- **Async processing**: Queue system for handling large volumes
-- **Database optimization**: PostgreSQL with proper indexing
-- **Rate limiting**: Protect against API abuse
-
-### 4. Developer Experience (1 day)
-- **CLI tool**: Command-line interface for developers
-- **IDE plugins**: VS Code/IntelliJ extensions
-- **GitHub integration**: Direct PR comment posting
-- **Review templates**: Predefined review formats for different languages
-
-### 5. Analytics & Monitoring (1 day)
-- **Usage analytics**: Track review patterns and effectiveness
-- **Performance monitoring**: API response times and error rates
-- **Review quality metrics**: User feedback on AI suggestions
-- **Cost tracking**: Monitor OpenAI API usage and costs
-
-## Development Notes
-
-### Technology Choices
-
-- **FastAPI**: Chosen for its excellent async support, automatic API documentation, and type safety
-- **SQLAlchemy**: Provides robust ORM with good async support and database abstraction
-- **SQLite**: Simple, file-based database perfect for development and small deployments
-- **OpenAI GPT-3.5-turbo**: Cost-effective model with good code review capabilities
-
-### Error Handling
-
-The service includes comprehensive error handling for:
-- Invalid API keys
-- Network connectivity issues
-- Malformed requests
-- Database errors
-- LLM API failures
-
-### Security Considerations
-
-- API key validation
-- Input sanitization
-- SQL injection prevention (via SQLAlchemy ORM)
-- Rate limiting (can be added via middleware)
-
-## Troubleshooting
-
-### Common Issues
-
-1. **OpenAI API Key Error**: Ensure your API key is valid and has sufficient credits
-2. **Database Connection Issues**: Check that the data directory is writable
-3. **Port Conflicts**: Change the port in docker-compose.yml if 8000 is occupied
+Prompts and expected schema for code reviews are configured in `app/configs.py`.  
+The expected schema is a dictionary mapping keys to types (`"string"`, `"numeric"`, etc.).
 
 ### Logs
 
@@ -257,44 +196,8 @@ View application logs:
 docker-compose logs -f code-review-service
 ```
 
-## Development Tools Used
+## Notes
 
-This project was developed using modern AI-assisted development tools:
-
-- **Cursor AI**: Used extensively for code generation, refactoring, and debugging
-- **GitHub Copilot**: Assisted with boilerplate code and common patterns
-- **ChatGPT**: Used for architectural decisions and complex problem-solving
-
-### Where AI Tools Excelled:
-- **FastAPI setup**: Quickly generated the basic FastAPI structure with proper async support
-- **Database models**: Generated SQLAlchemy models and Pydantic schemas efficiently
-- **Docker configuration**: Created production-ready Dockerfile and docker-compose.yml
-- **Documentation**: Helped structure comprehensive README with clear examples
-
-### Where AI Tools Struggled:
-- **OpenAI API integration**: Required manual debugging of response parsing and error handling
-- **Database relationships**: Needed manual refinement of the database schema design
-- **Async patterns**: Required careful review to ensure proper async/await usage throughout
-
-### Workarounds:
-- **Manual testing**: Created custom test script to verify API functionality
-- **Error handling**: Added comprehensive try-catch blocks and fallback mechanisms
-- **Code review**: Manually reviewed all AI-generated code for best practices and security
-
-## License
-
-This project is created for the code review exercise and is not intended for production use without additional security and scalability considerations.
-
-
-## License
-
-TODO:
-
-1) make sure everything works
-2) review code to make sure I understand everything
-3) Cosmetic and structural improvements
-    - database structure
-    - class + api structure
-4) refine llm side of things
-5) 
-
+- The backend is robust to LLM output format changes; suggestions are always parsed as a list.
+- All review logic is handled in `code_reviewer_service.py` using the `LLMService`.
+- Error handling is improved for invalid LLM responses and database writes.
