@@ -55,9 +55,3 @@ class CodeReviewService:
         print(f"[DEBUG] Writing to SQL with parameters: {sql_para}")
         db_record = self.sql.add_record_to_table(CodeSnippet, sql_para)
         return db_record
-    
-if __name__ == '__main__':
-    import asyncio
-    service = CodeReviewService()
-    code_to_review = "My name is Luca and I love programming in Python!"
-    review = asyncio.run(service.review_code("italian", code_to_review))

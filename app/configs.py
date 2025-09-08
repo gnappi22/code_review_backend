@@ -30,7 +30,7 @@ Rating should be 1-10 where 10 is excellent code.""",
     'max_retries': 3,
     'code_review_expected_schema': {
         "summary": "string",
-        "suggestions": "string",  # If you expect a list, use "list"
+        "suggestions": "string",
         "rating": "numeric"
     }
 
